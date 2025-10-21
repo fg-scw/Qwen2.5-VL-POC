@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  qwen-vl-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qwen-vl-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - MODEL_NAME=Qwen/Qwen2.5-VL-7B-Instruct
+      - DEVICE_MAP=auto
+      - TORCH_DTYPE=float16
+      - HF_HOME=/app/models
+      - LOG_LEVEL=WARNING
+      - API_WORKERS=1
+      - MAX_NEW_TOKENS=1024
+    volumes:
+      - ./models:/app/models:rw
+      - ./logs:/app/logs:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 30G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "10"
