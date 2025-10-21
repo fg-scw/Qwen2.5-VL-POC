@@ -18,8 +18,7 @@ git clone <repo>
 cd Qwen2.5-VL-POC/server
 
 mkdir -p models logs
-cd app/
-cp .env.example .env
+cp app/.env.example .env
 ```
 
 ### 2. Build & Run
