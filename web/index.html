@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen2.5-VL Image Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+        
+        .drop-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+        
+        .drop-zone p {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .drop-zone small {
+            color: #999;
+            display: block;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .prompt-section {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .file-list {
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .file-item button {
+            background: #e74c3c;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .file-item button:hover {
+            background: #c0392b;
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .result-filename {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+        
+        .result-analysis {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .result-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .drop-zone {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Analysis</h1>
+        <p class="subtitle">Upload images for AI-powered analysis</p>
+        
+        <div class="upload-section">
+            <div class="drop-zone" id="dropZone">
+                <p>Click or drag images here</p>
+                <small>Supported: JPG, PNG, WebP, GIF, BMP (Max 50MB each)</small>
+            </div>
+            <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+        
+        <div class="prompt-section">
+            <label for="prompt">Analysis Prompt (Optional)</label>
+            <textarea id="prompt" placeholder="Leave empty for default description. Example: 'Describe this image in French' or 'Read all text in the image'"></textarea>
+        </div>
+        
+        <div class="controls">
+            <button id="browseBtn">Select Images</button>
+            <button id="analyzeBtn" disabled>Analyze</button>
+            <button id="clearBtn">Clear All</button>
+        </div>
+        
+        <div id="fileList" class="file-list"></div>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="results" class="results"></div>
+    </div>
+    
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal()">Close</div>
+            <img id="modalImage" class="modal-image" src="" alt="">
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = '/api';
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const promptInput = document.getElementById('prompt');
+        const fileListDiv = document.getElementById('fileList');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+        
+        let selectedFiles = [];
+        
+        browseBtn.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            addFiles(Array.from(e.target.files));
+            fileInput.value = '';
+        });
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            addFiles(Array.from(e.dataTransfer.files));
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            promptInput.value = '';
+            fileListDiv.innerHTML = '';
+            resultsDiv.innerHTML = '';
+            statusDiv.classList.remove('show');
+            analyzeBtn.disabled = true;
+        });
+        
+        analyzeBtn.addEventListener('click', analyzeImages);
+        
+        function addFiles(files) {
+            const validFiles = files.filter(f => f.type.startsWith('image/'));
+            selectedFiles = [...selectedFiles, ...validFiles];
+            updateFileList();
+            analyzeBtn.disabled = selectedFiles.length === 0;
+        }
+        
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            analyzeBtn.disabled = selectedFiles.length === 0;
+        }
+        
+        function updateFileList() {
+            fileListDiv.innerHTML = selectedFiles.map((file, index) => `
+                <div class="file-item">
+                    <span>${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <button onclick="removeFile(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+        
+        async function analyzeImages() {
+            if (selectedFiles.length === 0) return;
+            
+            analyzeBtn.disabled = true;
+            resultsDiv.innerHTML = '';
+            
+            const prompt = promptInput.value.trim() || null;
+            const results = [];
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                
+                showStatus(`info`, `Processing ${i + 1}/${selectedFiles.length}...`);
+                document.querySelector('.progress-fill').style.width = `${(i / selectedFiles.length) * 100}%`;
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    if (prompt) formData.append('prompt', prompt);
+                    
+                    const response = await fetch(`${API_URL}/analyze-image`, {
+                        method: 'POST',
+                        body: formData,
+                        timeout: 120000
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push({
+                            filename: file.name,
+                            ...data
+                        });
+                        displayResult(data, file);
+                    } else {
+                        const error = await response.json();
+                        showStatus('error', `Error analyzing ${file.name}: ${error.error}`);
+                    }
+                } catch (error) {
+                    showStatus('error', `Failed to analyze ${file.name}: ${error.message}`);
+                }
+            }
+            
+            document.querySelector('.progress-fill').style.width = '100%';
+            if (results.length > 0) {
+                showStatus('success', `Successfully analyzed ${results.length} image(s)`);
+            }
+            
+            analyzeBtn.disabled = false;
+        }
+        
+        function displayResult(data, file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-item';
+                resultDiv.innerHTML = `
+                    <div class="result-filename">${file.name}</div>
+                    <img src="${e.target.result}" alt="${file.name}" class="result-image" onclick="openModal('${e.target.result}')">
+                    <div class="result-analysis">${escapeHtml(data.analysis)}</div>
+                    <div class="result-time">Inference time: ${data.inference_time?.toFixed(2) || 'N/A'} seconds</div>
+                `;
+                resultsDiv.appendChild(resultDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function showStatus(type, message) {
+            statusDiv.className = `status show ${type}`;
+            statusDiv.innerHTML = `<div>${message}</div>`;
+            if (type !== 'info') {
+                setTimeout(() => statusDiv.classList.remove('show'), 5000);
+            }
+        }
+        
+        function openModal(src) {
+            modalImage.src = src;
+            modal.classList.add('show');
+        }
+        
+        function closeModal() {
+            modal.classList.remove('show');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    </script>
+</body>
+</html>
