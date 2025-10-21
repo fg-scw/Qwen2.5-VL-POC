@@ -15,7 +15,7 @@ REST API for image analysis using Qwen2.5-VL vision-language model on GPU.
 
 ```bash
 git clone <repo>
-cd qwen2.5-vl-poc/server
+cd Qwen2.5-VL-POC/server
 
 mkdir -p models logs
 cp .env.example .env
