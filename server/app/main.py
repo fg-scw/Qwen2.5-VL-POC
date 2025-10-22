@@ -43,17 +43,17 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     global model, processor, device
-
+    
     try:
         device = get_device()
         logger.info(f"Device: {device}")
-
+        
         if device == "cuda":
             gpu_info = get_gpu_info()
             logger.info(f"GPU: {gpu_info.get('name')} - {gpu_info.get('total_memory_mb')} MB VRAM")
-
+        
         logger.info(f"Loading model: {settings.model_name}")
-
+        
         model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             settings.model_name,
             torch_dtype=torch.float16 if settings.torch_dtype == "float16" else torch.bfloat16,
@@ -61,14 +61,14 @@ async def startup_event():
             trust_remote_code=True,
             attn_implementation="sdpa"
         )
-
+        
         processor = AutoProcessor.from_pretrained(
             settings.model_name,
             trust_remote_code=True
         )
-
+        
         logger.info("Model loaded successfully")
-
+        
     except Exception as e:
         logger.error(f"Startup error: {e}")
         raise
@@ -135,54 +135,45 @@ async def analyze_image(
     file: UploadFile = File(...),
     prompt: Optional[str] = Query(None)
 ):
-    """
-    Analyze image with optional custom prompt.
-    
-    Supports any language and any type of customization.
-    The user prompt is passed directly to the model without modification.
-    """
     if model is None or processor is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-
+    
     try:
         if not validate_image_format(file.filename, settings.supported_formats):
             raise HTTPException(
                 status_code=400,
                 detail=f"Unsupported format. Accepted: {', '.join(settings.supported_formats)}"
             )
-
+        
         file_bytes = await file.read()
-
+        
         if len(file_bytes) > settings.max_image_size:
             raise HTTPException(
                 status_code=413,
                 detail=f"File too large (max {settings.max_image_size / 1024 / 1024:.0f}MB)"
             )
-
+        
         image = load_image_from_bytes(file_bytes)
         if image is None:
             raise HTTPException(status_code=400, detail="Invalid or corrupted image")
-
-        # Use user prompt or default
-        analysis_prompt = prompt if prompt else "Describe this image in detail."
-
+        
+        if not prompt:
+            prompt = "Describe this image in detail."
+        
         logger.info(f"Analyzing image: {file.filename}")
-        logger.info(f"Prompt: {analysis_prompt}")
-
-        # Build messages - user has full control via their prompt
+        
         messages = [
             {
                 "role": "user",
                 "content": [
                     {"type": "image", "image": image},
-                    {"type": "text", "text": analysis_prompt}
+                    {"type": "text", "text": prompt}
                 ]
             }
         ]
-
+        
         start_time = time.time()
-
-        # Apply chat template
+        
         inputs = processor.apply_chat_template(
             messages,
             tokenize=True,
@@ -190,14 +181,13 @@ async def analyze_image(
             return_dict=True,
             return_tensors="pt"
         )
-
+        
         if device == "cuda":
             inputs = {
-                k: v.to(device) if hasattr(v, "to") else v
+                k: v.to(device) if hasattr(v, "to") else v 
                 for k, v in inputs.items()
             }
-
-        # Generate response
+        
         with torch.no_grad():
             generated_ids = model.generate(
                 **inputs,
@@ -206,24 +196,22 @@ async def analyze_image(
                 top_p=settings.top_p,
                 top_k=settings.top_k
             )
-
-        # Trim input tokens from output
+        
         generated_ids_trimmed = [
-            out_ids[len(in_ids):]
+            out_ids[len(in_ids):] 
             for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)
         ]
-
-        # Decode output
+        
         output_text = processor.batch_decode(
             generated_ids_trimmed,
             skip_special_tokens=True,
             clean_up_tokenization_spaces=False
         )[0]
-
+        
         inference_time = time.time() - start_time
-
+        
         logger.info(f"Analysis completed in {inference_time:.2f}s")
-
+        
         return ImageAnalysisResponse(
             success=True,
             message="Analysis completed successfully",
@@ -232,7 +220,7 @@ async def analyze_image(
             model=settings.model_name,
             timestamp=datetime.now()
         )
-
+        
     except HTTPException:
         raise
     except Exception as e:
