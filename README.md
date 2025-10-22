@@ -353,20 +353,6 @@ server {
 - Monitor GPU usage
 - Enable request logging
 
-### Monitoring
-
-Monitor resource usage:
-
-```bash
-docker stats
-
-# GPU usage
-nvidia-smi -l 1
-
-# API response times
-docker-compose logs qwen-vl-api | grep "Time:"
-```
-
 ### Scaling
 
 For multiple GPUs:
@@ -382,48 +368,6 @@ deploy:
           capabilities: [gpu]
 ```
 
-## Development
-
-### Adding Features
-
-1. Modify `server/app/main.py` for API changes
-2. Modify `web/index.html` for web interface
-3. Update `server/requirements.txt` if needed
-4. Rebuild: `docker-compose build --no-cache`
-
-### Testing
-
-```bash
-# Test API directly
-python -m pytest server/
-
-# Test web client
-cd client
-python simple_client.py test.jpg
-
-# Test batch
-cd client
-python advanced_client.py
-```
-
-## File Sizes
-
-- Server image: ~3.5 GB
-- Web image: ~100 MB
-- Model cache: ~15 GB (first download)
-
-## Support
-
-- Model: https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct
-- Transformers: https://huggingface.co/docs/transformers
-- FastAPI: https://fastapi.tiangolo.com
-- Docker: https://docs.docker.com
-
-## License
-
-Apache 2.0
-
-## Version
 
 - Application: 1.0.0
 - Model: Qwen2.5-VL-7B-Instruct
