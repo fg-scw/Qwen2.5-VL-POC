@@ -61,7 +61,7 @@ qwen2.5-vl-api/
 
 ```bash
 git clone <repository-url>
-cd qwen2.5-vl-api
+cd Qwen2.5-VL-POC
 mkdir -p server/models server/logs
 ```
 
@@ -80,9 +80,6 @@ docker-compose build --no-cache
 
 # Start services (waits for API to be healthy)
 docker-compose up -d
-
-# Wait for model loading (~2-3 minutes)
-sleep 180
 
 # Check status
 docker-compose ps
@@ -430,4 +427,4 @@ Apache 2.0
 
 - Application: 1.0.0
 - Model: Qwen2.5-VL-7B-Instruct
-- Last Updated: 2025-01-21
+- Last Updated: 2025-09-22
