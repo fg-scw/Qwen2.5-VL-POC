@@ -133,7 +133,7 @@ async def info():
 @app.post("/analyze-image", response_model=ImageAnalysisResponse)
 async def analyze_image(
     file: UploadFile = File(...),
-    prompt: Optional[str] = Query(Form)
+    prompt: Optional[str] = Form(None)
 ):
     if model is None or processor is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
