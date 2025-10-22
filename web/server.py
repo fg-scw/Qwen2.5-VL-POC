@@ -45,11 +45,15 @@ async def analyze_image(file: UploadFile = File(...), prompt: str = Query(None))
             content = await file.read()
             data.add_field("file", content, filename=file.filename)
             
+            # ✅ FIXE: Transmettre le prompt en Query Parameter à l'API backend
+            url = f"{API_URL}/analyze-image"
             if prompt:
-                data.add_field("prompt", prompt)
+                # Ajouter le prompt en query parameter, pas en FormData
+                url += f"?prompt={prompt}"
+                logger.info(f"Proxying request with prompt: {prompt}")
             
             async with session.post(
-                f"{API_URL}/analyze-image",
+                url,
                 data=data,
                 timeout=aiohttp.ClientTimeout(total=120)
             ) as resp:
