@@ -5,7 +5,7 @@ import asyncio
 import aiohttp
 import logging
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, Query
+from fastapi import FastAPI, UploadFile, File, Query, Form
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -36,6 +36,7 @@ WEB_DIR = Path(__file__).parent
 async def serve_index():
     return FileResponse(WEB_DIR / "index.html", media_type="text/html")
 
+
 @app.post("/api/analyze-image")
 async def analyze_image(file: UploadFile = File(...), prompt: str = Form(None)):
     try:
@@ -44,15 +45,11 @@ async def analyze_image(file: UploadFile = File(...), prompt: str = Form(None)):
             content = await file.read()
             data.add_field("file", content, filename=file.filename)
             
-            # ✅ FIXE: Transmettre le prompt en Query Parameter à l'API backend
-            url = f"{API_URL}/analyze-image"
             if prompt:
-                # Ajouter le prompt en query parameter, pas en FormData
-                url += f"?prompt={prompt}"
-                logger.info(f"Proxying request with prompt: {prompt}")
+                data.add_field("prompt", prompt)
             
             async with session.post(
-                url,
+                f"{API_URL}/analyze-image",
                 data=data,
                 timeout=aiohttp.ClientTimeout(total=120)
             ) as resp:
