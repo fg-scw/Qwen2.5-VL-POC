@@ -36,9 +36,8 @@ WEB_DIR = Path(__file__).parent
 async def serve_index():
     return FileResponse(WEB_DIR / "index.html", media_type="text/html")
 
-
 @app.post("/api/analyze-image")
-async def analyze_image(file: UploadFile = File(...), prompt: str = Query(None)):
+async def analyze_image(file: UploadFile = File(...), prompt: str = Form(None)):
     try:
         async with aiohttp.ClientSession() as session:
             data = aiohttp.FormData()

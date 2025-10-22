@@ -4,7 +4,7 @@ from typing import Optional
 import time
 
 import torch
-from fastapi import FastAPI, UploadFile, File, HTTPException, Query
+from fastapi import FastAPI, UploadFile, File, HTTPException, Query, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
@@ -133,7 +133,7 @@ async def info():
 @app.post("/analyze-image", response_model=ImageAnalysisResponse)
 async def analyze_image(
     file: UploadFile = File(...),
-    prompt: Optional[str] = Query(None)
+    prompt: Optional[str] = Query(Form)
 ):
     if model is None or processor is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
