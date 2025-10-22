@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Analysis</title>
+    <title>Scaleway Instances - Qwen2.5-VL Image Analysis</title>
     <style>
         * {
             margin: 0;
@@ -11,59 +11,182 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --color-primary: #007DBA;
+            --color-primary-dark: #005682;
+            --color-accent: #FF7A00;
+            --color-success: #2ECC71;
+            --color-warning: #F39C12;
+            --color-error: #E74C3C;
+            --color-info: #3498DB;
+            --color-dark: #1A2235;
+            --color-light: #F5F7FA;
+            --color-border: #E0E6ED;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
+            color: var(--color-dark);
         }
         
         .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 900px;
-            width: 100%;
-            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        h1 {
-            color: #333;
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
             margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-content h1 {
             font-size: 28px;
+            color: var(--color-dark);
+            margin-bottom: 5px;
+        }
+        
+        .header-content p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .header-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #2ECC71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            background: var(--color-light);
+        }
+        
+        .tab-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            margin-bottom: 20px;
         }
         
         .drop-zone {
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            padding: 40px;
+            border: 2px dashed var(--color-border);
+            border-radius: 12px;
+            padding: 60px 30px;
             text-align: center;
             cursor: pointer;
-            background: #f8f9ff;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #ffffff 0%, var(--color-light) 100%);
+            transition: var(--transition);
+            position: relative;
         }
         
         .drop-zone:hover {
-            border-color: #764ba2;
-            background: #f0f2ff;
+            border-color: var(--color-primary);
+            background: linear-gradient(135deg, #f5f7fa 0%, #eff2f8 100%);
         }
         
         .drop-zone.dragover {
-            border-color: #764ba2;
-            background: #e8ebff;
+            border-color: var(--color-accent);
+            background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+            transform: scale(1.01);
+        }
+        
+        .drop-zone.has-files {
+            border-color: var(--color-primary);
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+        }
+        
+        .drop-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .drop-zone p {
-            color: #666;
+            color: var(--color-dark);
             margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
         }
         
         .drop-zone small {
             color: #999;
+            font-size: 13px;
         }
         
         input[type="file"] {
@@ -71,144 +194,553 @@
         }
         
         .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
         }
         
         button {
-            background: #667eea;
-            color: white;
+            padding: 12px 24px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            border-radius: 8px;
             font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        button:hover {
-            background: #764ba2;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--color-light);
+            color: var(--color-dark);
+            border: 1px solid var(--color-border);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e6ed;
+        }
+        
+        .btn-danger {
+            background: #fff5f5;
+            color: var(--color-error);
+            border: 1px solid #fde0e0;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #ffe0e0;
         }
         
         button:disabled {
-            background: #ccc;
+            opacity: 0.5;
             cursor: not-allowed;
         }
         
         textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
             font-family: inherit;
             font-size: 14px;
-            min-height: 60px;
-            margin-bottom: 10px;
+            min-height: 80px;
+            resize: vertical;
+            transition: var(--transition);
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 125, 186, 0.1);
         }
         
         .status {
-            padding: 15px;
-            border-radius: 6px;
+            padding: 15px 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
             display: none;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         .status.show {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .status.success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-color: #2ECC71;
         }
         
         .status.error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-color: var(--color-error);
         }
         
         .status.info {
             background: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
+            border-color: var(--color-info);
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: var(--color-warning);
+        }
+        
+        .status-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 125, 186, 0.3);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .file-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .file-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--color-light);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .file-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .file-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .file-item-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 28px;
+            height: 28px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .file-item:hover .file-item-remove {
+            opacity: 1;
+        }
+        
+        .file-item-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         
         .result-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--color-light) 100%);
+            border-radius: 12px;
+            padding: 24px;
             margin-bottom: 20px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--color-primary);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .result-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .result-filename {
+            font-weight: 600;
+            color: var(--color-dark);
+            font-size: 16px;
+        }
+        
+        .result-time {
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
         
         .result-image {
             max-width: 300px;
             max-height: 300px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: var(--transition);
         }
         
-        .result-filename {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+        .result-image:hover {
+            transform: scale(1.05);
         }
         
         .result-analysis {
             color: #555;
-            line-height: 1.6;
+            line-height: 1.8;
             white-space: pre-wrap;
             word-wrap: break-word;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--color-accent);
+            font-size: 14px;
         }
         
-        .result-time {
-            color: #999;
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--color-border);
+            border-radius: 2px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
             font-size: 12px;
-            margin-top: 10px;
+            opacity: 0.9;
         }
         
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--color-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .modal-close:hover {
+            background: var(--color-border);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            color: var(--color-dark);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .empty-state p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
             }
             
             .controls {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
             
-            button {
-                width: 100%;
+            .tab-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            
+            .drop-zone {
+                padding: 40px 20px;
+            }
+            
+            .file-preview {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Image Analysis</h1>
-        
-        <div class="drop-zone" id="dropZone">
-            <p>Click or drag images here</p>
-            <small>JPG, PNG, WebP, GIF, BMP (Max 50MB)</small>
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1> Scaleway Instance GPU - Image Analysis </h1>
+                <p>Advanced vision-language model Qwen-2.5-VL</p>
+            </div>
+            <div class="header-badge">
+                <span>API Status</span>
+            </div>
         </div>
         
-        <input type="file" id="fileInput" multiple accept="image/*">
-        
-        <textarea id="prompt" placeholder="Optional prompt (e.g., 'Describe in French')"></textarea>
-        
-        <div class="controls">
-            <button id="browseBtn">Select Images</button>
-            <button id="analyzeBtn" disabled>Analyze</button>
-            <button id="clearBtn">Clear</button>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="single">📷 Single Image</button>
+            <button class="tab-btn" data-tab="batch">📦 Batch Processing</button>
         </div>
         
-        <div id="status" class="status"></div>
-        <div id="results"></div>
+        <!-- Single Image Tab -->
+        <div id="single" class="tab-content active">
+            <div class="card">
+                <h2 style="margin-bottom: 20px; color: var(--color-dark);">Single Image Analysis</h2>
+                
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-icon">📸</div>
+                    <p>Click or drag image here</p>
+                    <small>JPG, PNG, WebP, GIF, BMP (Max 50MB)</small>
+                </div>
+                
+                <input type="file" id="fileInput" accept="image/*">
+                
+                <div class="file-preview" id="filePreview"></div>
+                
+                <div style="margin: 20px 0;">
+                    <label for="prompt" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--color-dark);">Analysis Prompt (Optional)</label>
+                    <textarea id="prompt" placeholder="e.g., 'Describe this image in French' or leave empty for default analysis"></textarea>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn-primary" id="browseBtn">
+                        <span>📁</span> Select Image
+                    </button>
+                    <button class="btn-primary" id="analyzeBtn" disabled>
+                        <span>⚡</span> Analyze
+                    </button>
+                    <button class="btn-secondary" id="clearBtn">
+                        <span>🗑️</span> Clear
+                    </button>
+                </div>
+                
+                <div id="status" class="status"></div>
+                <div id="results"></div>
+            </div>
+        </div>
+        
+        <!-- Batch Processing Tab -->
+        <div id="batch" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px; color: var(--color-dark);">Batch Image Processing</h2>
+                
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Upload multiple images at once for efficient processing</p>
+                
+                <div class="drop-zone" id="batchDropZone">
+                    <div class="drop-icon">📦</div>
+                    <p>Click or drag multiple images here</p>
+                    <small>Process many images at once (Max 50MB each)</small>
+                </div>
+                
+                <input type="file" id="batchFileInput" multiple accept="image/*">
+                
+                <div id="batchStats" class="stats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statFiles">0</div>
+                        <div class="stat-label">Images Selected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statSize">0 MB</div>
+                        <div class="stat-label">Total Size</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statProgress">0%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                </div>
+                
+                <div class="file-preview" id="batchFilePreview"></div>
+                
+                <div style="margin: 20px 0;">
+                    <label for="batchPrompt" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--color-dark);">Analysis Prompt (Optional)</label>
+                    <textarea id="batchPrompt" placeholder="Same prompt will be applied to all images"></textarea>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn-primary" id="batchBrowseBtn">
+                        <span>📁</span> Select Images
+                    </button>
+                    <button class="btn-primary" id="batchAnalyzeBtn" disabled>
+                        <span>⚡</span> Analyze All
+                    </button>
+                    <button class="btn-secondary" id="batchClearBtn">
+                        <span>🗑️</span> Clear All
+                    </button>
+                    <button class="btn-secondary" id="exportBtn" style="display: none;">
+                        <span>💾</span> Export
+                    </button>
+                </div>
+                
+                <div id="batchStatus" class="status"></div>
+                
+                <div style="margin-top: 20px; border-top: 1px solid var(--color-border); padding-top: 20px;">
+                    <h3 style="color: var(--color-dark); margin-bottom: 15px;">Processing Queue</h3>
+                    <div id="batchResults"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img id="modalImage" style="width: 100%; height: auto; display: block;">
+        </div>
     </div>
     
     <script>
         const API_URL = '/api';
+        
+        // Single Image Mode
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const browseBtn = document.getElementById('browseBtn');
@@ -217,17 +749,44 @@
         const promptInput = document.getElementById('prompt');
         const statusDiv = document.getElementById('status');
         const resultsDiv = document.getElementById('results');
+        const filePreview = document.getElementById('filePreview');
         
+        // Batch Mode
+        const batchDropZone = document.getElementById('batchDropZone');
+        const batchFileInput = document.getElementById('batchFileInput');
+        const batchBrowseBtn = document.getElementById('batchBrowseBtn');
+        const batchAnalyzeBtn = document.getElementById('batchAnalyzeBtn');
+        const batchClearBtn = document.getElementById('batchClearBtn');
+        const batchPrompt = document.getElementById('batchPrompt');
+        const batchStatus = document.getElementById('batchStatus');
+        const batchResults = document.getElementById('batchResults');
+        const batchFilePreview = document.getElementById('batchFilePreview');
+        const exportBtn = document.getElementById('exportBtn');
+        const batchStats = document.getElementById('batchStats');
+        
+        // Tabs
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        let selectedFile = null;
         let selectedFiles = [];
         
-        console.log('Web interface initialized');
+        // Tab switching
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // ===== SINGLE IMAGE MODE =====
         
         browseBtn.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', (e) => {
-            addFiles(Array.from(e.target.files));
-            fileInput.value = '';
-        });
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleSingleFile(e.target.files[0]));
         
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -241,98 +800,274 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            addFiles(Array.from(e.dataTransfer.files));
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length > 0) {
+                handleSingleFile(files[0]);
+            }
         });
         
+        function handleSingleFile(file) {
+            if (!file) return;
+            selectedFile = file;
+            displaySingleFilePreview(file);
+            analyzeBtn.disabled = false;
+            dropZone.classList.add('has-files');
+        }
+        
+        function displaySingleFilePreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                filePreview.innerHTML = `
+                    <div class="file-item">
+                        <img src="${e.target.result}" alt="${file.name}">
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+        
         clearBtn.addEventListener('click', () => {
-            selectedFiles = [];
+            selectedFile = null;
+            filePreview.innerHTML = '';
             promptInput.value = '';
             resultsDiv.innerHTML = '';
             statusDiv.classList.remove('show');
             analyzeBtn.disabled = true;
+            dropZone.classList.remove('has-files');
         });
         
-        analyzeBtn.addEventListener('click', analyzeImages);
+        analyzeBtn.addEventListener('click', analyzeSingleImage);
         
-        function addFiles(files) {
-            const validFiles = files.filter(f => f.type.startsWith('image/'));
-            selectedFiles = [...selectedFiles, ...validFiles];
-            analyzeBtn.disabled = selectedFiles.length === 0;
-            console.log('Files selected:', selectedFiles.length);
-        }
-        
-        function showStatus(type, message) {
-            statusDiv.className = `status show ${type}`;
-            statusDiv.innerText = message;
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
-        
-        async function analyzeImages() {
-            if (selectedFiles.length === 0) return;
+        async function analyzeSingleImage() {
+            if (!selectedFile) return;
             
             analyzeBtn.disabled = true;
             resultsDiv.innerHTML = '';
-            
             const prompt = promptInput.value.trim() || null;
-            console.log('Starting analysis. Files:', selectedFiles.length, 'Prompt:', prompt ? 'yes' : 'no');
+            
+            showStatus(statusDiv, 'info', `📤 Uploading ${selectedFile.name}...`);
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                if (prompt) formData.append('prompt', prompt);
+                
+                const response = await fetch(`${API_URL}/analyze-image`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    showStatus(statusDiv, 'info', `⚙️ Analyzing image...`);
+                    const data = await response.json();
+                    displaySingleResult(data, selectedFile);
+                    showStatus(statusDiv, 'success', `✅ Analysis completed!`);
+                } else {
+                    const error = await response.json();
+                    showStatus(statusDiv, 'error', `❌ Error: ${error.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showStatus(statusDiv, 'error', `❌ Failed: ${error.message}`);
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+        
+        function displaySingleResult(data, file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-filename">${file.name}</div>
+                        <div class="result-time">⏱️ ${data.inference_time?.toFixed(2) || 'N/A'}s</div>
+                    </div>
+                    <img src="${e.target.result}" alt="${file.name}" class="result-image" onclick="openModal('${e.target.result}')">
+                    <div class="result-analysis">${escapeHtml(data.analysis)}</div>
+                `;
+                resultsDiv.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // ===== BATCH MODE =====
+        
+        batchBrowseBtn.addEventListener('click', () => batchFileInput.click());
+        batchDropZone.addEventListener('click', () => batchFileInput.click());
+        batchFileInput.addEventListener('change', (e) => handleBatchFiles(Array.from(e.target.files)));
+        
+        batchDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            batchDropZone.classList.add('dragover');
+        });
+        
+        batchDropZone.addEventListener('dragleave', () => {
+            batchDropZone.classList.remove('dragover');
+        });
+        
+        batchDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            batchDropZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            handleBatchFiles(files);
+        });
+        
+        function handleBatchFiles(files) {
+            selectedFiles = files;
+            updateBatchPreview();
+            updateBatchStats();
+            batchAnalyzeBtn.disabled = selectedFiles.length === 0;
+            batchDropZone.classList.toggle('has-files', selectedFiles.length > 0);
+        }
+        
+        function updateBatchPreview() {
+            batchFilePreview.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <button class="file-item-remove" onclick="removeBatchFile(${index})">✕</button>
+                    `;
+                    batchFilePreview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function updateBatchStats() {
+            const totalSize = (selectedFiles.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2);
+            document.getElementById('statFiles').textContent = selectedFiles.length;
+            document.getElementById('statSize').textContent = `${totalSize} MB`;
+            batchStats.style.display = selectedFiles.length > 0 ? 'grid' : 'none';
+        }
+        
+        function removeBatchFile(index) {
+            selectedFiles.splice(index, 1);
+            updateBatchPreview();
+            updateBatchStats();
+            batchAnalyzeBtn.disabled = selectedFiles.length === 0;
+        }
+        
+        batchClearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            batchFilePreview.innerHTML = '';
+            batchPrompt.value = '';
+            batchResults.innerHTML = '';
+            batchStatus.classList.remove('show');
+            batchAnalyzeBtn.disabled = true;
+            batchDropZone.classList.remove('has-files');
+            batchStats.style.display = 'none';
+            exportBtn.style.display = 'none';
+        });
+        
+        batchAnalyzeBtn.addEventListener('click', analyzeBatchImages);
+        
+        async function analyzeBatchImages() {
+            if (selectedFiles.length === 0) return;
+            
+            batchAnalyzeBtn.disabled = true;
+            batchResults.innerHTML = '';
+            const prompt = batchPrompt.value.trim() || null;
+            const results = [];
             
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
-                showStatus('info', `Processing ${i + 1}/${selectedFiles.length}: ${file.name}`);
+                const progress = ((i + 1) / selectedFiles.length * 100).toFixed(0);
+                document.getElementById('statProgress').textContent = `${progress}%`;
+                
+                showStatus(batchStatus, 'info', `📤 Processing ${i + 1}/${selectedFiles.length}: ${file.name}`);
                 
                 try {
                     const formData = new FormData();
                     formData.append('file', file);
                     if (prompt) formData.append('prompt', prompt);
                     
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 180000);
-                    
-                    console.log('Sending request for:', file.name);
                     const response = await fetch(`${API_URL}/analyze-image`, {
                         method: 'POST',
-                        body: formData,
-                        signal: controller.signal
+                        body: formData
                     });
-                    
-                    clearTimeout(timeoutId);
-                    console.log('Response status:', response.status);
                     
                     if (response.ok) {
                         const data = await response.json();
-                        displayResult(data, file);
+                        results.push({ file, data });
+                        displayBatchResult(data, file, i);
                     } else {
-                        const error = await response.json();
-                        showStatus('error', `Error: ${error.error}`);
+                        displayBatchError(file.name, i);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    if (error.name === 'AbortError') {
-                        showStatus('error', `Timeout: ${file.name}`);
-                    } else {
-                        showStatus('error', `Failed: ${error.message}`);
-                    }
+                    displayBatchError(file.name, i);
                 }
             }
             
-            showStatus('success', `Completed ${selectedFiles.length} image(s)`);
-            analyzeBtn.disabled = false;
+            showStatus(batchStatus, 'success', `✅ Batch processing completed!`);
+            batchAnalyzeBtn.disabled = false;
+            exportBtn.style.display = 'flex';
         }
         
-        function displayResult(data, file) {
+        function displayBatchResult(data, file, index) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const div = document.createElement('div');
                 div.className = 'result-item';
                 div.innerHTML = `
-                    <div class="result-filename">${file.name}</div>
-                    <img src="${e.target.result}" alt="${file.name}" class="result-image">
+                    <div class="result-header">
+                        <div class="result-filename">#${index + 1} - ${file.name}</div>
+                        <div class="result-time">⏱️ ${data.inference_time?.toFixed(2) || 'N/A'}s</div>
+                    </div>
+                    <img src="${e.target.result}" alt="${file.name}" class="result-image" onclick="openModal('${e.target.result}')">
                     <div class="result-analysis">${escapeHtml(data.analysis)}</div>
-                    <div class="result-time">Time: ${data.inference_time?.toFixed(2) || 'N/A'} seconds</div>
                 `;
-                resultsDiv.appendChild(div);
+                batchResults.appendChild(div);
             };
             reader.readAsDataURL(file);
+        }
+        
+        function displayBatchError(filename, index) {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.style.borderLeftColor = 'var(--color-error)';
+            div.innerHTML = `
+                <div class="result-header">
+                    <div class="result-filename">#${index + 1} - ${filename}</div>
+                    <div class="result-time">❌ Failed</div>
+                </div>
+            `;
+            batchResults.appendChild(div);
+        }
+        
+        exportBtn.addEventListener('click', exportResults);
+        
+        function exportResults() {
+            const data = selectedFiles.map((file, i) => ({
+                filename: file.name,
+                size: (file.size / 1024).toFixed(2) + ' KB',
+                timestamp: new Date().toISOString()
+            }));
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `batch_results_${Date.now()}.json`;
+            a.click();
+        }
+        
+        // ===== UTILITIES =====
+        
+        function showStatus(element, type, message) {
+            element.className = `status show ${type}`;
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'info': 'ℹ️',
+                'warning': '⚠️'
+            };
+            element.innerHTML = `<span class="status-icon">${icons[type]}</span><span>${message}</span>`;
         }
         
         function escapeHtml(text) {
@@ -340,6 +1075,22 @@
             div.textContent = text;
             return div.innerHTML;
         }
+        
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = src;
+            modal.classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('show');
+        }
+        
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target.id === 'imageModal') closeModal();
+        });
+        
+        console.log('✅ Qwen2.5-VL Image Analysis Platform Ready');
     </script>
 </body>
 </html>
