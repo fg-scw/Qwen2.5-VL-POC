@@ -89,7 +89,6 @@ docker-compose logs -f
 ### 4. Access Services
 
 - **Web Interface:** http://localhost:8080
-- **API Documentation:** http://localhost:8000/docs
 - **Health Check:** http://localhost:8000/health
 
 ## Usage
