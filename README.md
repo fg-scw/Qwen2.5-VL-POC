@@ -19,7 +19,7 @@ This platform provides a production-ready image analysis service using Qwen2.5-V
 ## Project Structure
 
 ```
-qwen2.5-vl-api/
+Qwen2.5-VL-POC/
 ├── server/
 │   ├── app/
 │   │   ├── __init__.py
